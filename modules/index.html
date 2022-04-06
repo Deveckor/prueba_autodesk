@@ -18,37 +18,78 @@
             text-decoration: none;
             padding: 1em;
         }
+        
+        /** Just simple CSS styling to make this page a little nicer **/
+        div {
+            padding: 2em;
+        }
+        div button {
+            background-color: #3252aa;
+            color: #fff;
+            text-decoration: none;
+            padding: 1em;
+            border-radius: 2px;
+            transition: background-color 0.2s ease;
+        }
+        div button:hover {
+            background-color: #ff5800;
+        }
+        div input {
+            background-color: #eee;
+            padding: 1em;
+        }
     </style>
+    
 </head>
 
 <body>
     <main id="main">
         <a href="/api/forge/oauth">Get Token</a>
-        <form action="submit">
-            <input type="text" name="bucket" placeholder="nameBucket">
-            <input type="submit" value="Guardar">
+        <form >
+            <input type="text" id="bucket" name="bucket" placeholder="nameBucket">
+            <input type="submit" id="buck" value="Guardar">
         </form>
+        <div>
+            
+        <form action="/api/forge/datamanagement/bucket/upload" enctype="multipart/form-data" method="post">
+            <input type="file" name="fileToUpload"/>
+            <button type="submit">Submit</button>
+        </form>
+        
+        </div>
     </main>
     <script>
 
-        document.addEventListener('submit', async (e)=>{
-            e.preventDefault()
+        
+                
+        document.addEventListener('click',async (e)=>{
             
-            let bucket = e.target.bucket.value;
-            try {
-                let options = {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        bucket: bucket
-                    }) 
+            if (e.target.matches('#buck')) {
+                e.preventDefault()
+                
+                let bucket = document.getElementById('bucket').value
+               console.log(bucket);
+                try {
+                    let options = {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            bucket: bucket
+                        }) 
+                    }
+                    console.log(options.body);
+                    let res = await fetch('/api/bucket', options)
+                    
+                } catch (error) {
+                    console.log(error);
                 }
-                console.log(options.body);
-                let res = await fetch('/api/bucket', options)
-                let json = await res.json()
-            } catch (error) {
-                console.log(error);
             }
         })
+            
+              
+                
+                
+         
     </script>
 </body>
 
