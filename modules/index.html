@@ -24,10 +24,31 @@
 <body>
     <main id="main">
         <a href="/api/forge/oauth">Get Token</a>
+        <form action="submit">
+            <input type="text" name="bucket" placeholder="nameBucket">
+            <input type="submit" value="Guardar">
+        </form>
     </main>
-
     <script>
 
+        document.addEventListener('submit', async (e)=>{
+            e.preventDefault()
+            
+            let bucket = e.target.bucket.value;
+            try {
+                let options = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        bucket: bucket
+                    }) 
+                }
+                console.log(options.body);
+                let res = await fetch('/api/bucket', options)
+                let json = await res.json()
+            } catch (error) {
+                console.log(error);
+            }
+        })
     </script>
 </body>
 
