@@ -68,11 +68,12 @@ app.get('/api/forge/oauth/public', async (req, res)=>{
              })
      
          })
+         console.log(result.data.access_token.red);
          res.json({access_token: result.data.access_token, 
-             expires_in: response.data.expires_in})
+             expires_in: result.data.expires_in})
         
     } catch (error) {
-        res.status(500).json(error)
+        res.status(500).json({error: error.message})
     }
 })
 app.post('/api/bucket', (req, res)=>{
@@ -93,7 +94,7 @@ app.post('/api/bucket', (req, res)=>{
        console.log('error /api/bucket'.rainbow);
    }
 })
-const bucketKey = 'archivo_1';
+const bucketKey = 'archivo_2';
 console.log(bucketKey.rainbow);
 const policyKey = 'transient';
 
@@ -151,28 +152,28 @@ app.get('/api/forge/datamanagement/bucket/detail', async (req, res)=>{
 
 
 
+
 const multer = require('multer');
-const { log } = require('console');
 let upload = multer({dest: 'upload/'})
 
 app.post('/api/forge/datamanagement/bucket/upload', upload.single('fileToUpload'),  (req, res) => {
     const fs = require('fs');
     fs.readFile(req.file.path, async (err, filecontent) => {
+        console.log(filecontent);
         try {
             let result = await Axios({
                 method: 'PUT',
                 url: `https://developer.api.autodesk.com/oss/v2/buckets/${encodeURIComponent(bucketKey)}/objects/${encodeURIComponent(req.file.originalname)}`,
                 headers:{
                     Authorization: `Bearer ${access_token}`,
-                    'Content-Disposition': req.file.originalname,
-                    'Content-Length': filecontent.length
+                    'Accept-Encoding': 'gzip, deflate'
+                    
                 },
                 data: filecontent
             })
-            let data = await result.data.objectId;
-            let buff = await Buffer.from(data)
-            let urn = await buff.toString('base64')
-            console.log(urn);
+            console.log(result.data.objectId);
+            let urn = Buffer.from(result.data.objectId).toString('base64')
+            console.log(urn.rainbow);
             res.redirect(`/api/forge/modelderivative/${urn}`)
         } catch (error) {
             console.log(error);
@@ -185,6 +186,7 @@ app.get('/api/forge/modelderivative/:urn', async (req, res)=>{
     let urn = req.params.urn;
     let format_type = 'sfv';
     let format_views = ['2d', '3d'];
+    console.log(urn);
     try {
         
         let result = await Axios({
@@ -195,21 +197,24 @@ app.get('/api/forge/modelderivative/:urn', async (req, res)=>{
                  Authorization: `Bearer ${access_token}`
             },
             data: JSON.stringify({
-                'input': {
-                    'urn': urn
+                "input": {
+                    "urn": urn,
+                    
                 },
-                'output': {
-                    'formats': [
-                        {
-                            'type': format_type,
-                            'views': format_views
-                        }
-                    ]
+                "output": {
+                    
+                    "formats": [
+                    {
+                        "type": "svf",
+                        "views": ["3d", "2d"]
+                    }]
                 }
             })
         })
+        console.log(urn);
         res.redirect(`/viewer.html?urn=${urn}`);
     } catch (error) {
+        console.log(error);
         res.send('Error at Model Derivative job.');
     }
 
